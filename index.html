@@ -37,6 +37,7 @@ ul{margin:8px 0;padding-inline-start:20px}li{margin:2px 0}
 a.btn{margin-top:16px;display:inline-block;text-align:center;padding:10px 14px;border-radius:10px;background:var(--g);color:#fff;text-decoration:none;font-weight:600}
 .empty{padding:40px;text-align:center;color:var(--mut)}
 footer{color:var(--mut);font-size:14.5px;line-height:1.9;padding:0 0 40px}
+.blessing{position:fixed;bottom:18px;left:18px;z-index:20;max-width:calc(100vw - 36px);background:#fff;color:#1f5c3a;border:1px solid #bfd5c5;border-radius:14px;padding:12px 18px;box-shadow:0 6px 24px #123d2722;font-size:18px;pointer-events:none}.blessing[hidden]{display:none}
 </style></head><body>
 <header><div class="wrap">
 <h1>دليل كليات الزراعة في مصر</h1>
@@ -70,4 +71,8 @@ function render(){
 document.getElementById('q').addEventListener('input',render);
 document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b));render()}));
 fetch('data.json', {cache:'no-store'}).then(r=>r.json()).then(d=>{F=d;stats();render()}).catch(()=>{document.getElementById('list').innerHTML='<div class="empty">تعذّر تحميل البيانات (data.json).</div>'});
-</script></body></html>
+</script><div id="blessing" class="blessing" role="status" aria-live="polite" hidden></div>
+<script>
+(()=>{const phrases=['صلّ على رسول الله','صلّ على النبي','صلّ على الحبيب المصطفى'];const box=document.getElementById('blessing');let i=0;function show(){if(document.hidden)return;box.textContent=phrases[i++%phrases.length];box.hidden=false;setTimeout(()=>{box.hidden=true},5000)}setInterval(show,60000);})();
+</script>
+</body></html>
