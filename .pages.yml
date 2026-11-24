@@ -1,0 +1,39 @@
+media: media
+content:
+  - name: faculties
+    label: كليات الزراعة
+    type: file
+    path: data.json
+    format: json
+    list: true
+    fields:
+      - name: number
+        label: الرقم
+        type: number
+      - name: name
+        label: اسم الكلية
+        type: string
+        required: true
+      - name: official
+        label: المصدر رسمي (موقع الكلية)
+        type: boolean
+      - name: count
+        label: عدد الأقسام المعلن (اختياري)
+        type: number
+      - name: source
+        label: المصدر
+        type: string
+      - name: url
+        label: رابط الصفحة الرسمية
+        type: string
+      - name: note
+        label: ملاحظة
+        type: text
+      - name: depts
+        label: الأقسام
+        type: string
+        list: true
+      - name: programs
+        label: البرامج الدراسية
+        type: string
+        list: true
