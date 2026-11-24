@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>دليل كليات الزراعة في مصر</title>
 <meta name="description" content="أقسام وبرامج كليات الزراعة في الجامعات المصرية مع روابط المواقع الرسمية.">
-<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="fonts.css?v=2">
 <style>
 :root{--g:#1f5c3a;--g2:#e8f1ea;--ink:#1d2420;--mut:#5b655f;--line:#dfe6e1;--bg:#f6f8f6}
 *{box-sizing:border-box}
@@ -69,5 +69,5 @@ function render(){
 }
 document.getElementById('q').addEventListener('input',render);
 document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b));render()}));
-fetch('data.json').then(r=>r.json()).then(d=>{F=d;stats();render()}).catch(()=>{document.getElementById('list').innerHTML='<div class="empty">تعذّر تحميل البيانات (data.json).</div>'});
+fetch('data.json', {cache:'no-store'}).then(r=>r.json()).then(d=>{F=d;stats();render()}).catch(()=>{document.getElementById('list').innerHTML='<div class="empty">تعذّر تحميل البيانات (data.json).</div>'});
 </script></body></html>
