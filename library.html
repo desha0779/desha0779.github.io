@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>مكتبتي الخاصة | دليل الزراعة</title>
 <link rel="stylesheet" href="fonts.css">
@@ -20,7 +21,7 @@
 <p>الكتب مش عامة ومش بتظهر لزوار الموقع. الملفات وبيانات الحساب بتتحفظ على Supabase، والدخول عن طريق GitHub. اسم الكتاب وتاريخ رفعه بيتحفظوا مع حسابك.</p>
 <p class="note">التجربة: ٥ كتب لكل حساب، كل كتاب لحد ٥ ميجابايت. السعة الإجمالية للتجربة ٢٠ كتابًا. استخدم كتب عندك حق رفعها، ومن غير بيانات حساسة. فيه حدود للخدمة المجانية وقد تتوقف التجربة؛ احتفظ بنسخة عندك.</p>
 <p class="note">الترجمة والشرح التلقائي لسه مش مفعّلين. مش بنبعت كتبك لخدمة ترجمة أو ذكاء اصطناعي.</p>
-<button id="login">دخول بحساب GitHub</button>
+<button id="login" style="display:none">دخول بحساب GitHub</button>
 <div id="account" hidden>
 <span id="who">
 </span> <button id="logout" class="secondary">خروج من هذا الجهاز</button>
@@ -58,7 +59,7 @@ async function run(fn){if(busy)return;busy=true;document.querySelectorAll('butto
 el('login').onclick=()=>run(async()=>{status('بنحوّلك لتسجيل الدخول الآمن...');const {error}=await sb.auth.signInWithOAuth({provider:'github',options:{redirectTo:location.origin+'/library.html',scopes:'user:email'}});check(error)});
 el('logout').onclick=()=>run(async()=>{check((await sb.auth.signOut({scope:'local'})).error);location.replace('library.html')});
 el('upload').onsubmit=e=>{e.preventDefault();run(async()=>{const f=el('pdf').files[0];if(!f||f.size>5242880||f.size<5){status('اختار PDF بحجم لحد ٥ ميجابايت.');return}if(!(await f.slice(0,5).text()).startsWith('%PDF-')){status('الملف مش PDF صالح.');return}const title=el('title').value.trim();if(!title){status('اكتب اسم الكتاب.');return}status('جاري حفظ الكتاب...');const r=await sb.rpc('library_reserve',{p_title:title});check(r.error);const path=session.user.id+'/'+r.data+'.pdf';const u=await sb.storage.from('private-library').upload(path,f,{contentType:'application/pdf',upsert:false});if(u.error){await sb.rpc('library_forget',{p_id:r.data});throw u.error}el('upload').reset();await refresh();status('اتحفظ الكتاب في مكتبتك الخاصة. تقدر ترجع له بنفس حساب GitHub.');})};
-(async()=>{try{const {data,error}=await sb.auth.getSession();check(error);session=data.session;if(session&&!session.user.is_anonymous){el('login').hidden=true;el('account').hidden=false;el('shelf').hidden=false;el('who').textContent='تم الدخول بحساب '+(session.user.user_metadata.user_name||'GitHub');await refresh();status('مكتبتك جاهزة.')}else status('سجّل دخول عشان تشوف كتبك الخاصة.')}catch(e){status(message(e))}})();
+(async()=>{try{const {data,error}=await sb.auth.getSession();check(error);session=data.session;if(session&&!session.user.is_anonymous){el('login').hidden=true;el('login').style.display='none';el('account').hidden=false;el('shelf').hidden=false;el('who').textContent='تم الدخول بحساب '+(session.user.user_metadata.user_name||'GitHub');await refresh();status('مكتبتك جاهزة.')}else {el('login').style.display='inline-block';status('سجّل دخول عشان تشوف كتبك الخاصة.')} }catch(e){status(message(e))}})();
 </script>
 </body>
 </html>
