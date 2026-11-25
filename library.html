@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مكتبتي الخاصة | دليل الزراعة</title>
+<link rel="stylesheet" href="fonts.css">
+<style>*{box-sizing:border-box}body{margin:0;background:#f4f7f3;color:#193d32;font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;line-height:1.9}main{max-width:900px;margin:auto;padding:32px 20px}a{color:#236c53}header{display:flex;justify-content:space-between;gap:12px;align-items:center}h1{font-size:2rem;margin:20px 0 4px}.tag{font-size:.85rem;color:#526b60}.card{background:white;border:1px solid #dce5dd;border-radius:18px;padding:24px;margin:22px 0}button,.btn{font:inherit;border:0;border-radius:9px;background:#23674e;color:white;padding:9px 17px;cursor:pointer;display:inline-block}button:disabled{opacity:.5;cursor:wait}.secondary{background:#edf3ef;color:#194332}.danger{background:#fff0ec;color:#983b29}input{font:inherit;max-width:100%;padding:8px;border:1px solid #cbd9cf;border-radius:8px}label{display:block;margin:14px 0 5px}#status{padding:12px;min-height:52px;white-space:pre-line}#books{list-style:none;padding:0}li{padding:16px 0;border-bottom:1px solid #e4eae4}li:last-child{border:0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:9px}.note{font-size:.9rem;color:#4b6659}footer{font-size:.85rem;border-top:1px solid #dbe4db;padding-top:16px}h2{margin-top:0}@media(max-width:500px){main{padding:20px 14px}.card{padding:18px}h1{font-size:1.7rem}header{align-items:flex-start}}</style>
+</head>
+<body>
+<main>
+<header>
+<a href="./">← دليل كليات الزراعة</a>
+<span class="tag">مكتبة خاصة · تجربة محدودة</span>
+</header>
+<h1>كتبك، في مكانك الخاص</h1>
+<p>احفظ ملفات PDF وارجع لها من أي جهاز بنفس حساب GitHub.</p>
+<section class="card">
+<h2>قبل ما تبدأ</h2>
+<p>الكتب مش عامة ومش بتظهر لزوار الموقع. الملفات وبيانات الحساب بتتحفظ على Supabase، والدخول عن طريق GitHub. اسم الكتاب وتاريخ رفعه بيتحفظوا مع حسابك.</p>
+<p class="note">التجربة: ٥ كتب لكل حساب، كل كتاب لحد ٥ ميجابايت. السعة الإجمالية للتجربة ٢٠ كتابًا. استخدم كتب عندك حق رفعها، ومن غير بيانات حساسة. فيه حدود للخدمة المجانية وقد تتوقف التجربة؛ احتفظ بنسخة عندك.</p>
+<p class="note">الترجمة والشرح التلقائي لسه مش مفعّلين. مش بنبعت كتبك لخدمة ترجمة أو ذكاء اصطناعي.</p>
+<button id="login">دخول بحساب GitHub</button>
+<div id="account" hidden>
+<span id="who">
+</span> <button id="logout" class="secondary">خروج من هذا الجهاز</button>
+</div>
+</section>
+<div id="status" role="status" aria-live="polite">
+</div>
+<section class="card" id="shelf" hidden>
+<h2>مكتبتي</h2>
+<p class="note">الحذف نهائي من المكتبة. نزّل نسخة الأول لو محتاجها.</p>
+<ul id="books">
+</ul>
+<form id="upload">
+<label for="title">اسم الكتاب</label>
+<input id="title" maxlength="160" required placeholder="مثال: أساسيات علوم النبات">
+<label for="pdf">ملف PDF فقط</label>
+<input id="pdf" type="file" accept="application/pdf,.pdf" required>
+<p>
+<button id="save">حفظ في مكتبتي</button>
+</p>
+</form>
+</section>
+<footer>mustafa mahmoud (desha) · <a href="./">رجوع للدليل</a>
+</footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.js" integrity="sha384-tuevtT+97g9yLeuT/m52ejUJbc0hzsN6MPLiQEccySreiGjrcgk2tMBJR7/l6HGM" crossorigin="anonymous">
+</script>
+<script>
+'use strict';
+const sb=supabase.createClient('https://lpzulcmtchuizdelmdxx.supabase.co','sb_publishable_8Q4O4kQQ9sCo50bUcKYpFw_rPio3EKA',{auth:{storageKey:'desha-library-auth-v1',flowType:'pkce'}});
+const el=id=>document.getElementById(id);let session=null,busy=false;
+function status(s){el('status').textContent=s}function check(error){if(error)throw error}function message(e){console.error('Library request failed',e.status||'');const m=e.message||'';if(m.includes('Account limit'))return 'وصلت لحد ٥ كتب. احذف كتاب قبل رفع غيره.';if(m.includes('capacity'))return 'السعة التجريبية اكتملت. جرّب لاحقًا.';if(m.includes('size'))return 'الملف أكبر من الحد المسموح.';return 'العملية ما كملتش. اتأكد من الإنترنت وجرب تاني. لو الدخول انتهى، سجّل دخول من جديد.'}
+async function refresh(){const {data,error}=await sb.rpc('library_list');check(error);el('books').replaceChildren();if(!data.length){let p=document.createElement('li');p.textContent='لسه مفيش كتب محفوظة.';el('books').append(p)}for(const b of data){let row=document.createElement('li'),title=document.createElement('strong'),meta=document.createElement('div'),actions=document.createElement('div');title.textContent=b.title;meta.className='note';meta.textContent=new Date(b.created_at).toLocaleDateString('ar-EG');actions.className='actions';const path=session.user.id+'/'+b.id+'.pdf';for(const [label,cls,fn] of [['تنزيل نسخة','secondary',async()=>{const {data,error}=await sb.storage.from('private-library').download(path);check(error);const a=document.createElement('a');a.href=URL.createObjectURL(data);a.download=b.title.replace(/[\\/:*?"<>|]/g,'_')+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),30000);status('بدأ تنزيل نسخة من الكتاب.')}],['حذف','danger',async()=>{if(!confirm('حذف «'+b.title+'» نهائيًا من المكتبة؟'))return;const {error}=await sb.storage.from('private-library').remove([path]);check(error);const r=await sb.rpc('library_forget',{p_id:b.id});check(r.error);await refresh();status('اتحذف الكتاب من المكتبة.')}]] ){let btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.className=cls;btn.onclick=()=>run(fn);actions.append(btn)}row.append(title,meta,actions);el('books').append(row)}}
+async function run(fn){if(busy)return;busy=true;document.querySelectorAll('button').forEach(b=>b.disabled=true);try{await fn()}catch(e){status(message(e))}finally{busy=false;document.querySelectorAll('button').forEach(b=>b.disabled=false)}}
+el('login').onclick=()=>run(async()=>{status('بنحوّلك لتسجيل الدخول الآمن...');const {error}=await sb.auth.signInWithOAuth({provider:'github',options:{redirectTo:location.origin+'/library.html',scopes:'user:email'}});check(error)});
+el('logout').onclick=()=>run(async()=>{check((await sb.auth.signOut({scope:'local'})).error);location.replace('library.html')});
+el('upload').onsubmit=e=>{e.preventDefault();run(async()=>{const f=el('pdf').files[0];if(!f||f.size>5242880||f.size<5){status('اختار PDF بحجم لحد ٥ ميجابايت.');return}if(!(await f.slice(0,5).text()).startsWith('%PDF-')){status('الملف مش PDF صالح.');return}const title=el('title').value.trim();if(!title){status('اكتب اسم الكتاب.');return}status('جاري حفظ الكتاب...');const r=await sb.rpc('library_reserve',{p_title:title});check(r.error);const path=session.user.id+'/'+r.data+'.pdf';const u=await sb.storage.from('private-library').upload(path,f,{contentType:'application/pdf',upsert:false});if(u.error){await sb.rpc('library_forget',{p_id:r.data});throw u.error}el('upload').reset();await refresh();status('اتحفظ الكتاب في مكتبتك الخاصة. تقدر ترجع له بنفس حساب GitHub.');})};
+(async()=>{try{const {data,error}=await sb.auth.getSession();check(error);session=data.session;if(session&&!session.user.is_anonymous){el('login').hidden=true;el('account').hidden=false;el('shelf').hidden=false;el('who').textContent='تم الدخول بحساب '+(session.user.user_metadata.user_name||'GitHub');await refresh();status('مكتبتك جاهزة.')}else status('سجّل دخول عشان تشوف كتبك الخاصة.')}catch(e){status(message(e))}})();
+</script>
+</body>
+</html>
